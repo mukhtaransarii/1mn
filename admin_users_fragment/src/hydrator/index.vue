@@ -189,6 +189,7 @@ onMounted(() => {
                             ]
                         },
                         "table": {
+                            // config
                             "columns": [
                                 {
                                     title: "name",
