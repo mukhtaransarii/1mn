@@ -197,6 +197,12 @@ mE_preview!.innerHTML = `
 await _run();
 
 
+ce_listen("msg", async (_$) => {
+  console.log("ce_listen msg", _$);
+});
+
+ 
+
 //test..
 setTimeout(async() => {
  ce_listen("msg", async(_$) => {

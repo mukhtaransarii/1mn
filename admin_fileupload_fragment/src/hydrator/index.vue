@@ -8,7 +8,10 @@
     <div  v-if="_var.html.table">
         <div v-html="_var.html.table"></div>
     </div>
-     
+    <div v-if="_var.html.dialog">
+        <div v-html="_var.html.dialog"></div>
+    </div>
+  
 </template>
 
 <script lang="ts" setup>
@@ -25,12 +28,14 @@ const _html : any = ref(null);
 const searchText = ref('');
 const nextCursor = ref<string | null>(null);
 const isEnd = ref(false);
+let deleteRow: { public_id: string; url: string, resource_type: string } | null = null;
 
 //set..
 const _var = ref({
     html:{
         table:null,
         search_panel:null,
+        dialog:null
     }
 });
 
@@ -69,6 +74,34 @@ async function fetchList(expression = '', cursor: string | null = null) {
   }
 }
 
+async function deleteFile(public_id: string, resource_type: string) {
+  try {
+    const formData = new FormData();
+    formData.append("public_id", public_id);
+    formData.append("invalidate", "true");
+
+    const url = `https://fastapi.dryutil.1mn.io/client/api/i/ona/file_storage?typ=cloudinary&opr=delete_file&resource_type=${resource_type}`;
+
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${API_CONFIG.token}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error(res.statusText);
+
+    return await res.json();
+  } catch (err) {
+    console.error("Delete error:", err);
+    return null;
+  }
+}
+
+
+
 
 // Convert API response to table rows
 function convertApiDataToRows(api: any, _$: any) {
@@ -81,13 +114,15 @@ function convertApiDataToRows(api: any, _$: any) {
     sno: offset + index + 1,
     asset_id: r.asset_id,
     public_id: r.public_id,
+    resource_type: r.resource_type,
     url: `<a href="${r.secure_url || r.url}" target="_blank" class="text-blue-600 hover:underline">${r.secure_url || r.url}</a>`,
     //status: r.status
     status:
     r.status === 'active'
-    ? '<span class="inline-flex items-center justify-center px-2 py-1 rounded w-full text-xs font-bold border border-transparent bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">Active</span>'
-    : '<span class="inline-flex items-center justify-center px-2 py-1 rounded w-full text-xs font-bold border border-transparent bg-red-100 text-red-700 dark:bg-emerald-500/10 dark:text-emerald-400">Active</span>'
-  ,
+    ? '<button class="px-2 py-1 rounded bg-emerald-100 text-emerald-700">Active</button>'
+    : '<button class="px-2 py-1 rounded bg-red-100 text-red-700">Active</button>'
+    ,
+    action: `<button class="delete-btn px-2 py-1 rounded bg-red-100 text-red-700 " data-public_id="${r.public_id}" data-url="${r.secure_url || r.url}" data-resource_type="${r.resource_type}">Delete</button>`
   }));
 }
 
@@ -191,10 +226,12 @@ onMounted(() => {
                         "table": {
                             "columns": [
                               { title: "#", field: "sno", hozAlign: "center", width: 60 },
-                              { title: "Asset ID", field: "asset_id", width: 300 },
-                              { title: "Public ID", field: "public_id", width: 300},
-                              { title: "URL", field: "url", formatter: "html", minWidth: 320 },
-                              { title: "Status", field: "status", formatter: "html", hozAlign: "center", width: 100 }
+                              { title: "Asset ID", field: "asset_id", width: 300, hozAlign: "left" },
+                              { title: "Public ID", field: "public_id", width: 300, hozAlign: "left" },
+                              { title: "Resource Type", field: "resource_type", width: 150, hozAlign: "left" },
+                              { title: "URL", field: "url", formatter: "html", minWidth: 320, hozAlign: "left" },
+                              { title: "Status", field: "status", formatter: "html", hozAlign: "center", width: 120 },
+                              { title: "Action", field: "action", formatter: "html", hozAlign: "center", width: 120 }
                             ],
                             "rows": [],//apiRows
                         }
@@ -217,7 +254,22 @@ onMounted(() => {
                         }
                     }
                 },
-
+                {
+                  id: "dialog-cnf_delete",
+                  type: "dialog",
+                  slug: "dialog",
+                  data: {
+                    label: "Confirm Delete",
+                    visible: false,
+                    modal: true,
+                    class: "w-sm md:w-md",
+                    positive: { label: "Ok" },
+                    negative: { label: "Cancel" },
+                    content: {
+                      value: "<div>Are you sure you want to delete?</div>"
+                    }
+                  }
+                }
             ]
         };
 
@@ -239,15 +291,12 @@ onMounted(() => {
         (async()=>{
             ce_listen('msg', async (_$) => {
               // endless scroll
-              if (_$.type === 'load_more' &&
-                  _$._$p.data.curr.id === '3e1bc78c-104f-4f6f-aa87-75') {
+              if (_$.type === 'load_more' && _$._$p.data.curr.id === '3e1bc78c-104f-4f6f-aa87-75') {
                   updateTableData(_$, searchText.value);
               }
 
               // search
-              if (_$.type === 'search:query' &&
-                  _$._$p.data.curr.id === '3e1bc78c-aa87-search-panel') {
-
+              if (_$.type === 'search:query' && _$._$p.data.curr.id === '3e1bc78c-aa87-search-panel') {
                 const raw = _$. _p.query?.trim();
 
                 if (!raw) {
@@ -276,7 +325,13 @@ onMounted(() => {
                   true
                 );
               }
-              });
+
+              // delete
+              if (_$.type === 'btn:positive' && _$._$p.data.curr.id === 'dialog-cnf_delete') {
+                 if(!deleteRow) return;
+                 await deleteFile(deleteRow.public_id, deleteRow.resource_type);
+              }
+            });
         })();
 
         const _run = async () => {
@@ -293,6 +348,7 @@ onMounted(() => {
             //set..
             _var.value.html.table = _ce_renderer_rsp.r[0] || "";
             _var.value.html.search_panel = _ce_renderer_rsp.r[1] || "";
+            _var.value.html.dialog = _ce_renderer_rsp.r[2] || "";
 
             //log..
             //console.log(_var.value.html.table);
@@ -315,6 +371,27 @@ onMounted(() => {
         }
 
         await _run();
+
+        // action button column
+        document.addEventListener('click', (e: any) => {
+          const btn = e.target.closest('.delete-btn');
+          if (!btn) return;
+
+          const public_id = btn.dataset.public_id;
+          const url = btn.dataset.url;
+          const resource_type = btn.dataset.resource_type;
+
+          // store selected item globally if needed
+          deleteRow = { public_id, url, resource_type };
+          
+          ce_call('msg', {
+            type: 'open',
+            custom: {},
+            _$p: {},
+            _p: {},
+            where: { key: 'id', value: 'dialog-cnf_delete' }
+          });
+        });
     })();
 });
 
