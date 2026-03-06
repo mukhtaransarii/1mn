@@ -113,8 +113,10 @@ async function deleteCollectionDoc(collection: string, title: string) {
 // Convert API response to table rows
 function convertApiDataToRows(api: any) {
   if (!api?.success || !api?.data?.documents) return [];
+  const startIndex = (currentPage.value - 1) * 20;
 
-  return api.data.documents.map((doc: any) => ({
+  return api.data.documents.map((doc: any, index: number) => ({
+    series: startIndex + index + 1, // ✅ running number
     id: doc.id,
     json: JSON.stringify(doc, null, 2), // full object
     action: `
@@ -165,6 +167,7 @@ onMounted(() => {
                         },
                         "table": {
                             "columns": [
+                              { title: "#", field: "series", width: 70 },
                               { title: "Id", field: "id", width: 320 },
                               { title: "Json", field: "json" },
                               { title: "Action", field: "action", formatter: "html", hozAlign: "center", width: 160 }
@@ -202,7 +205,7 @@ onMounted(() => {
                     "appendTo": "body",
                     "value": {},
                     "options": [],
-                    "style": { "width": "12rem" },
+                    "style": { "width": "15rem" },
                     "api": {
                       "url": "https://fastapi.dryutil.1mn.io/client/api/i/ona/product_dir?typ=list_collection",
                       "method": "post",
@@ -380,6 +383,11 @@ onMounted(() => {
 
                 selectedDeleteRow.value = null;
               }
+
+              // 🔹 UPDATE PRODUCT
+              if (_$.type === "btn:positive" && _$._$p.data.curr.id === "dialog-edit") {
+                console.log('btn positive updateee', selectedEditRow.value);
+              }
             });
         })();
 
@@ -420,7 +428,7 @@ onMounted(() => {
 
         await _run();
 
-        // action button column
+        // action edit
         document.addEventListener('click', async (e: any) => {
           const btn = e.target.closest('.edit-btn');
           if (!btn) return;
@@ -454,7 +462,8 @@ onMounted(() => {
             data: { l: [_data.l.find((x: any) => x.id === 'dialog-edit')]}
           });
         });
-
+        
+        // action delete
         document.addEventListener('click', async (e: any) => {
           const btn = e.target.closest('.delete-btn');
           if (!btn) return;

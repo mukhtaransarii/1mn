@@ -1,0 +1,17 @@
+@import "tailwindcss";
+/*@tailwind base;
+@tailwind components;
+@tailwind utilities;*/
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.stagger-move,
+.stagger-enter-active,
+.stagger-leave-active { transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1); }
+.stagger-enter-from,
+.stagger-leave-to { opacity: 0; transform: scale(0.9) translateY(20px); }
