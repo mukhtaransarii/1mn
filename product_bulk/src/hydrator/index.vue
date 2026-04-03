@@ -200,7 +200,7 @@
                 
                 // getting uploaded files
                 if (_$.type === 'fileUpload:uploader') {
-                  uploadedFiles.value = _$.custom?.event?.files || [];
+                  uploadedFiles.value = _$.custom?.event?.filkfes || [];
                   console.log('Files upload:', uploadedFiles.value);
                 }
 

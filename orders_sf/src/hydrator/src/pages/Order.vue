@@ -10,8 +10,8 @@
        </div>
   
        <div class="flex flex-col md:flex-row gap-6">
-        <OrderLeft  />
-        <OrderRight   />
+          <OrderLeft  />
+          <OrderRight   />
        </div>
      </div>
 </template>

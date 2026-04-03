@@ -3,7 +3,7 @@
     <div 
       v-show="open" 
       @click.self="close"
-      class="fixed h-screen w-screen bottom-0 z-50 flex items-end md:items-center justify-center md:bg-black/30"
+      class="fixed h-screen w-screen left-0 bottom-0 z-50 flex items-end md:items-center justify-center md:bg-black/30"
     >
       <!-- Modal Container -->
       <div 
@@ -96,7 +96,7 @@
           <!-- Address Section -->
           <div class="bg-white dark:bg-zinc-800 rounded-lg p-3 border border-gray-200 dark:border-zinc-600">
             <div class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>

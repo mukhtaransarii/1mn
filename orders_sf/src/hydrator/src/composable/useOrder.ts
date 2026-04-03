@@ -78,7 +78,8 @@ export const useOrder = (/*_v?:{
     
       if(!data.success) return console.log("api error", error.value)
       console.log("return req api response",data);
-      //message
+      getDeliveredOrder();
+      getAllOrder();
   }
 
   const getDeliveredOrder = async () => {
@@ -88,14 +89,52 @@ export const useOrder = (/*_v?:{
         "user_id": "user_1",
         "status": "delivered",
         "search": "",
-        "exclude_key": ["user_id"],
+        //"exclude_key": ["user_id"],
         "page": 1,
         "limit": 10
       },token)
 
     if (!data?.success) return console.log("api error", error.value)
-    deliveredOrder.value = data.orders
+    deliveredOrder.value = data.orders;
   }
 
-  return { getAllOrder, order, getPaymentStatus, payment_status, page_state, returnRequest, getDeliveredOrder, deliveredOrder }
+  const createReviewAndRating = async (order_item_id:number, rating:number, review_text:string) => {
+    // console.log("order_item_id", order_item_id)
+    // console.log("rating", rating)
+    // console.log("review_text", review_text)
+
+    const data = await post(url,
+      {
+        "operation": "create_review",
+        "order_item_id": order_item_id,
+        "rating": rating,
+        "review_text": review_text
+      },token)
+
+    if (!data?.success) return console.log("api error", error.value)
+    console.log(data);
+    getDeliveredOrder();
+    getAllOrder();
+  }
+
+  const updateReviewAndRating = async (review_id:any, rating:number, review_text:string) => {
+    // console.log("review_id", review_id)
+    // console.log("rating", rating)
+    // console.log("review_text", review_text)
+
+    const data = await post(url,
+      {
+        "operation": "update_review",
+        "review_id": review_id,
+        "rating": rating,
+        "review_text": review_text
+      },token)
+
+    if (!data?.success) return console.log("api error", error.value)
+    console.log(data);
+    getDeliveredOrder();
+    getAllOrder();
+  }
+
+  return { getAllOrder, order, getPaymentStatus, payment_status, page_state, returnRequest, getDeliveredOrder, deliveredOrder, createReviewAndRating, updateReviewAndRating }
 } 

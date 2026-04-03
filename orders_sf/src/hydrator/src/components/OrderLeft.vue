@@ -1,5 +1,5 @@
 <template>
-    <div class="flex md:w-[70vw] flex-col gap-3">
+    <div class="flex md:flex-1 flex-col gap-3 min-w-0">
       <!-- Search order -->
       <div class="bg-white dark:bg-zinc-800 flex items-center gap-2 md:rounded-2xl rounded-b-2xl p-4">
         <div class="w-full md:max-w-sm flex items-center gap-2 bg-gray-100 dark:bg-zinc-700 rounded-2xl p-4">
@@ -27,6 +27,9 @@
           Show the QR code or tell the code <mark class="bg-transparent text-violet-500 font-medium">354955</mark> at the pickup point to pick up your order
         </p>
       </div>
+      <div v-show="toggleQR" @click="toggleQR = false" class="fixed bg-black/20 h-screen w-screen bottom-0 right-0 z-50 flex items-end md:justify-end md:p-4">
+        <QR/>
+      </div>
   
       <!-- Purchased button -->
       <div @click="page_state='PURCHASED_PAGE'" class="bg-white dark:bg-zinc-800 flex items-center justify-between gap-2 rounded-2xl px-4 py-6 md:py-4">
@@ -42,15 +45,33 @@
         </svg>
       </div>
       
+      <!-- skalton -->
+      <div v-if="!order.length" class="bg-white dark:bg-zinc-800 rounded-2xl px-4 py-6 md:py-4">
+        <div class="bg-gray-100 dark:bg-zinc-700 h-8 w-40 rounded-xl mb-1"></div>
+        <div class="bg-gray-100 dark:bg-zinc-700 h-4 w-48 rounded-xl mb-1"></div>
+        <div class="bg-gray-100 dark:bg-zinc-700 h-4 w-52 rounded-xl"></div>
+
+        <div class="flex items-center gap-4 my-8">
+          <div class="bg-gray-100 dark:bg-zinc-700 h-64 w-48 rounded-xl"></div>
+          <div class="bg-gray-100 dark:bg-zinc-700 h-64 w-48 rounded-xl"></div>
+          <div class="bg-gray-100 dark:bg-zinc-700 h-64 w-48 rounded-xl"></div>
+          <div class="bg-gray-100 dark:bg-zinc-700 h-64 w-48 rounded-xl"></div>
+        </div>
+
+        <div class="flex items-center justify-between mb-1.5">
+          <div class="bg-gray-100 dark:bg-zinc-700 h-8 w-40 rounded-xl"></div>
+          <div class="bg-gray-100 dark:bg-zinc-700 h-8 w-40 rounded-xl"></div>
+        </div>
+
+        <div class="bg-gray-100 dark:bg-zinc-700 h-16 w-full rounded-xl"></div>
+      </div>
+      
       <OrderCard
         v-for="order in filteredOrders"
         :key="order.order_id"
         :order="[order]"
       />
-      
-      <div v-show="toggleQR" @click="toggleQR = false" class="fixed bg-black/20 h-screen w-screen bottom-0 right-0 z-50 flex items-end md:justify-end md:p-4">
-        <QR/>
-      </div>
+
     </div>
 </template>
 
@@ -61,7 +82,6 @@
 
   import { useOrder } from '../composable/useOrder.ts';
 
-  //const {_p,_$p} = defineProps();
 
 
   const { order, page_state } = useOrder();
